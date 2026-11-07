@@ -88,6 +88,18 @@ describe('FilesBody', () => {
     expect(envIcon).not.toBe(readmeIcon)
   })
 
+  it('roots the tree at the live working directory, not the immutable header cwd', async () => {
+    const worktree = `${ROOT}/.agents/worktrees/topic`
+    const { view, script } = mountBody(ROOT, { workingDirectory: worktree })
+    expect(script.list).not.toHaveBeenCalled()
+    await act(() => script.watches.ready(worktree))
+    expect(script.list).toHaveBeenCalledWith(SESSION, worktree, expect.any(AbortSignal))
+    await act(() => script.settle({ ok: true, value: ROOT_LEVEL }))
+    expect(view.container.querySelector('[data-files-state="tree"]')?.getAttribute('data-files-root')).toBe(worktree)
+    expect(view.container.querySelector('[data-files-path]')?.getAttribute('title')).toBe(worktree)
+    expect(names(view.container)).toEqual([`${worktree}/src`, `${worktree}/.env`, `${worktree}/pipe`, `${worktree}/README.md`])
+  })
+
   it('heads a separator-only root by the root itself, since it has no final segment', async () => {
     const { view, script } = mountBody('/')
     await act(() => script.watches.ready('/'))

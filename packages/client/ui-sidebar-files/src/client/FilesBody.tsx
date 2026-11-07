@@ -49,7 +49,7 @@ export function FilesBody(props: FilesBodyProps): ReactNode {
     () => tab.actions.bindCommands({ refresh: () => { refresh(panel.id) } }),
     [tab.actions, panel.id, refresh],
   )
-  const cwd = useSessions(sessions => sessions.byId[sessionId]?.cwd)
+  const cwd = useSessions(sessions => sessions.byId[sessionId]?.projectionValues?.workingDirectory ?? sessions.byId[sessionId]?.cwd)
   // The setting belongs to a listed tree, so there is nothing to set before one.
   const autoRefresh = useStore((store) => {
     const tree = store.byPane[panel.id]?.tree

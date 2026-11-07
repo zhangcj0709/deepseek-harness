@@ -63,6 +63,8 @@ export interface Placement {
   refreshShortcut?: SidebarRightTabInfo['tab']['refreshShortcut']
   /** The session's working directory as `useSessions` reports it; `null` for a session without one. */
   cwd: string | null
+  /** The live working directory projection, when the spec gives the session one; the Session header keeps `cwd`. */
+  workingDirectory?: string | null
 }
 
 /** What a spec holds after mounting: the rendered view and every hand on the tree. */
@@ -130,8 +132,8 @@ function harness(placement: Placement, controller: AbortController) {
     openTab: vi.fn<SidebarRightTabActions['openTab']>(),
     close: vi.fn<SidebarRightTabActions['close']>(),
   }
-  const sessionsAt = (cwd: string | null): SessionListState =>
-    ({ byId: cwd === null ? {} : { [SESSION]: { cwd } } } as unknown as SessionListState)
+  const sessionsAt = (cwd: string | null, workingDirectory: string | null = null): SessionListState =>
+    ({ byId: cwd === null ? {} : { [SESSION]: { cwd, ...workingDirectory === null ? {} : { projectionValues: { workingDirectory } } } } } as unknown as SessionListState)
   const useTabInfo = (): SidebarRightTabInfo => ({
     sidebar: { expanded: true, fullscreen: false },
     panel: { id: PANE, isFloating: placement.isFloating ?? false },
@@ -154,7 +156,7 @@ function harness(placement: Placement, controller: AbortController) {
     useContextMenu: contextMenuHook(openMenu),
     renderFactorySlot: (name: string, input: object) => name === 'sidebar.files.tree' ? <TreeFixture {...input as FileTreeInput} t={t} /> : null,
     sessionId: SESSION,
-    useSessions: <S,>(sel: (s: SessionListState) => S) => sel(sessionsAt(placement.cwd)),
+    useSessions: <S,>(sel: (s: SessionListState) => S) => sel(sessionsAt(placement.cwd, placement.workingDirectory ?? null)),
     useStore: hookOf(instance),
     actions: instance.actions,
     ...members,

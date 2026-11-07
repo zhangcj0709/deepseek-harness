@@ -738,6 +738,21 @@ describe('FileNavigator beside a preview', () => {
     expect(back.container.querySelector('[aria-current="true"]')).toBeNull()
   })
 
+  it('rebuilds the tree at the new directory when the session enters a worktree', async () => {
+    const worktree = `${ROOT}/.agents/worktrees/topic`
+    const h = mountNavigator(A)
+    await act(() => h.script.watches.ready(ROOT))
+    await act(() => h.script.settle({ ok: true, value: ROOT_LEVEL }))
+    expect(h.instance.getSnapshot().byPane[PANE]?.tree?.root).toBe(ROOT)
+    h.placement.workingDirectory = worktree
+    h.rerender()
+    await act(() => h.script.watches.ready(worktree))
+    expect(h.script.list).toHaveBeenLastCalledWith(SESSION, worktree, expect.any(AbortSignal))
+    await act(() => h.script.settle({ ok: true, value: ROOT_LEVEL }))
+    expect(h.instance.getSnapshot().byPane[PANE]?.tree?.root).toBe(worktree)
+    expect(h.view.container.querySelector('[data-files-root]')?.getAttribute('data-files-root')).toBe(worktree)
+  })
+
   it('places the face beside its tab only with a workspace, and a tree shown once one appears takes no focus', async () => {
     const h = mountNavigator(A, {}, null)
     expect(h.beside(TAB)).toBe(false)

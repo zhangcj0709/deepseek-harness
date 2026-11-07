@@ -75,7 +75,7 @@ export function FileNavigator({
   const { tab, panel } = useTabInfo()
   const { getTriggerProps } = useContextMenu()
   const paneId = panel.id
-  const cwd = useSessions(sessions => sessions.byId[sessionId]?.cwd)
+  const cwd = useSessions(sessions => sessions.byId[sessionId]?.projectionValues?.workingDirectory ?? sessions.byId[sessionId]?.cwd)
   const state = useStore(store => store.byPane[paneId])
   const rowWidth = useRowWidth(paneId)
   const canOpen = useCanOpen(check => check)

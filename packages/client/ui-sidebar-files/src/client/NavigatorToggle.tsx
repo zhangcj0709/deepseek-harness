@@ -42,7 +42,7 @@ export function NavigatorToggle(
   { useTabInfo, sessionId, useSessions, useStore, actions, toggleDrawn, t }: FactoryComponentPropsOf<'sidebar.files.navigator.toggle'>,
 ): ReactNode {
   const { panel } = useTabInfo()
-  const cwd = useSessions(sessions => sessions.byId[sessionId]?.cwd)
+  const cwd = useSessions(sessions => sessions.byId[sessionId]?.projectionValues?.workingDirectory ?? sessions.byId[sessionId]?.cwd)
   const open = useStore(store => store.byPane[panel.id]?.open) === true
   // Stable, so the control registers once per drawing rather than on every render.
   const toggleRef = useCallback((button: HTMLElement | null) => { toggleDrawn(panel.id, button) }, [toggleDrawn, panel.id])
